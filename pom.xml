@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.scijava</groupId>
+		<artifactId>pom-scijava</artifactId>
+		<version>14.0.0</version>
+		<relativePath />
+	</parent>
+
+	<groupId>ar.com.yahoojuliobuonfigli</groupId>
+	<artifactId>MRF_</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+
+	<name>Multiple Relationship Finder</name>
+	<description>A Maven project implementing an ImageJ 1.x plugin.</description>
+	<url>http://www.mendoza-conicet.gob.ar/portal/ihem/paginas/index/damiani-maria-teresa/</url>
+	<inceptionYear>2017</inceptionYear>
+	<organization>
+		<name>IHEM</name>
+		<url>http://http://www.mendoza-conicet.gob.ar/portal/ihem/</url>
+	</organization>
+	<licenses>
+		<license>
+			<name>Simplified BSD License</name>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<id>juliobuonfigli</id>
+			<name>Julio Buonfigli</name>
+			<url>http://www.mendoza-conicet.gob.ar/portal/ihem/paginas/index/damiani-maria-teresa/</url>
+			<roles>
+				<role>lead</role>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>reviewer</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<mailingLists>
+		<mailingList>
+			<name>ImageJ Forum</name>
+			<archive>http://forum.imagej.net/</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+	<!--- Borre lo que habia xq me la aguanto -->	
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/imagej/example-legacy-plugin/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>None</system>
+	</ciManagement>
+
+	<properties>
+		<package-name>ar.com.yahoojuliobuonfigli.imagej</package-name>
+		<main-class>ar.com.yahoojuliobuonfigli.imagej.MRF_</main-class>
+		<license.licenseName>bsd_2</license.licenseName>
+		<license.copyrightOwners><!--- no tengo, y? --></license.copyrightOwners>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+		</dependency>
+	</dependencies>
+	<packaging>pom</packaging>
+</project>
