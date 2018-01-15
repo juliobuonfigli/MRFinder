@@ -13,6 +13,7 @@ import ij.plugin.frame.*;
 //estructura de esta clase: run, main, dialogos, getters, instancia objeto ruler, instancia resultados
 //la clase ruler va a tomar todos los datos introducidos en los cuadros de diálogo y va a controlar el diagrama de flujo 
 //puede que sea una clase estática 
+//primeraRama
 
 public class MRF_main implements PlugIn {
 
