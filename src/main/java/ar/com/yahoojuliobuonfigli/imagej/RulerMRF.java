@@ -28,7 +28,7 @@ green=MRF_main.getGreenChannel();
 blue=MRF_main.getBlueChannel();
 PrimaryMask=MRF_main.getPrimaryMask();
 MaskThreshold=MRF_main.getMaskThreshold();
-MaskOperator=MRF_main.getMaskOperator();
+//MaskOperator=MRF_main.getMaskOperator();
 RedMaskValue=MRF_main.getRedMaskValue();
 GreenMaskValue=MRF_main.getGreenMaskValue();
 BlueMaskValue=MRF_main.getBlueMaskValue();
@@ -38,13 +38,13 @@ GreenSignalValue=MRF_main.getGreenSignalValue();
 BlueSignalValue=MRF_main.getBlueSignalValue();
 ThresholdPercentage=MRF_main.getMFRthresholdPercentage();
 BooleanAverageIntensity=MRF_main.getAveregaIntensity();
-DoubleAverageIntensity=MRF_main.getAverageIntensityValue();
+//DoubleAverageIntensity=MRF_main.getAverageIntensityValue();
 DisperseSignal=MRF_main.getDisperseSignal();
 DisperseRatio=MRF_main.getDisperseRatio();
-RandomCriterion=MRF_main.getRandomizationCriterion();
+//RandomCriterion=MRF_main.getRandomizationCriterion();
 SignificanceLevel=MRF_main.getSignificanceLevel();
 GeneratedImages=MRF_main.getGeneratedImages();
-RandomSeed=MRF_main.getRamdonSeed();
+//RandomSeed=MRF_main.getRamdonSeed();
 RandomImages=MRF_main.getShowRandomImages();
 }
 
