@@ -11,7 +11,8 @@ import ij.plugin.frame.*;
 //estructura de esta clase: run, main, dialogos, getters, instancia objeto ruler, instancia resultados
 //la clase ruler va a tomar todos los datos introducidos en los cuadros de diálogo y va a controlar el diagrama de flujo 
 //puede que sea una clase estática 
-//Rama: primeraRama
+//Rama: sinDispersion
+//Estoy pensano que ruler la voy a borrar a la chucha y todo lo que estaba ahi lo voy a meter en el metodo run
 
 public class MRF_main implements PlugIn {
 
@@ -25,31 +26,26 @@ public class MRF_main implements PlugIn {
 	private ImagePlus imp;
 	private String[] level = {"0,05", "0,01"};
 	private String[] M_operator = {"AND", "OR"};
-	private String[] D_function = {"Linear", "Quadratic", "Geometric", "Aritmethic"};
+//	private String[] D_function = {"Linear", "Quadratic", "Geometric", "Aritmethic"};
 	private String[] M_thresholds = {"No_threshold", "User_thresholds", "Default", "Huang", "Intermodes", "IsoData", "IJ_IsoData", "Li", 
 			"MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen"};
     private String[] S_thresholds = {"No_threshold", "User_thresholds", "MRF_threshold", "Default", "Huang", "Intermodes", "IsoData", 
     		"IJ_IsoData", "Li", "MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen"};
-	private RulerMRF getToWorkComputer;
-    static double RedMaskValue=0, GreenMaskValue=0, BlueMaskValue=0, RedSignalValue=0, GreenSignalValue=0, BlueSignalValue=0;
+  
+    static double RedMaskValue, GreenMaskValue, BlueMaskValue, RedSignalValue, GreenSignalValue, BlueSignalValue;
     
-   
     public boolean mainDialog() {
 	    GenericDialog gd = new GenericDialog("Multiple Relationship Finder");
-	    gd.addMessage("CHANNELS:");
+	   
 		gd.addChoice("Channel_1 (red): ", titles, titles[0]);
 	    gd.addChoice("Channel_2 (green): ", titles, titles[1]);
 	    gd.addChoice("Channel_3 (blue): ", titles2, titles2[2]);
-	    gd.addMessage("MASK OPTIONS:");
 	    gd.addChoice("Primary mask: ", titles2, titles2[2]);
 	    gd.addChoice("Masks thresholds: ",  M_thresholds, M_thresholds[0]);
 	    gd.addChoice("Red/Green operator", M_operator, M_operator[1]);
 	    gd.addChoice("ResultOfRG/Blue operator",  M_operator, M_operator[1]);
 	    gd.addCheckbox("Use channel specific masks", false);
-	    gd.addMessage("SIGNAL OPTIONS:");
 	    gd.addChoice("Signal thresholds: ", S_thresholds, S_thresholds[2]);
-	    gd.addCheckbox("Disperse signal", false);
-	    gd.addNumericField("Dispertion ratio: ", 4, 2);
 	    gd.addCheckbox("MORE OPTIONS", false);
 	    gd.showDialog();
 	    i1name = gd.getNextChoice();
@@ -61,8 +57,6 @@ public class MRF_main implements PlugIn {
         SelectedMO2 = gd.getNextChoice();
         Smasks = gd.getNextBoolean();
         SelectedST = gd.getNextChoice();
-        Dsignal = gd.getNextBoolean();
-        Dratio = gd.getNextNumber();
         Moptions = gd.getNextBoolean();
         
         i1 = WindowManager.getImage(i1name);
@@ -100,19 +94,16 @@ public class MRF_main implements PlugIn {
     public boolean moreOptionsDialog() {
       	 GenericDialog gd4 = new GenericDialog("More Options");
       	 
-      	gd4.addChoice("Dispertion function: ", D_function, D_function[2]);
- 	    gd4.addNumericField("MRF effective signal percentage: ", 50, 2);
+        gd4.addNumericField("MRF effective signal percentage: ", 50, 2);
  	    gd4.addCheckbox("Equalize intensities", false); //iguala los otros dos a la intensidad del menos intenso
- 	    gd4.addCheckbox("Erode mask when dispersing", true);
-		gd4.addChoice("Significance level: ", level, level[0]);
+ 	   	gd4.addChoice("Significance level: ", level, level[0]);
 	    gd4.addNumericField("Number of random coefficients: ", 30, 2);
  	    gd4.addCheckbox("Show examples of generated images", false);
  	    gd4.addNumericField("Random seed: ", 1, 3);
  	    gd4.showDialog();
-      	SelectedDF = gd4.getNextChoice();
+      	
  	    Tpercentage = gd4.getNextNumber();
         Aintensity = gd4.getNextBoolean();
-        Erode = gd4.getNextBoolean();
         SelectedSL = gd4.getNextChoice();
         GeneratedI = gd4.getNextNumber();
         Rimages = gd4.getNextBoolean();
@@ -132,8 +123,8 @@ public class MRF_main implements PlugIn {
 	static String getMaskOperator2 () { return SelectedMO2; }
 	static boolean getSpecificMask () { return Smasks; } 
 	static String getSignalThreshold () { return SelectedST; }
-	static boolean getDisperseSignal () { return Dsignal; }
-	static double getDisperseRatio () { return Dratio; }
+//	static boolean getDisperseSignal () { return Dsignal; }
+//	static double getDisperseRatio () { return Dratio; }
 	//static boolean getMoreOptions () { return Moptions; }
 	//gd2
 	static double getRedMaskValue () { return RedMaskValue; }
@@ -144,10 +135,10 @@ public class MRF_main implements PlugIn {
 	static double getGreenSignalValue () { return GreenSignalValue; }
 	static double getBlueSignalValue () { return BlueSignalValue; }
 	//gd4	
-	static String getDispersionFunction () { return SelectedDF; }
+//	static String getDispersionFunction () { return SelectedDF; }
 	static double getMFRthresholdPercentage () { return Tpercentage; } 
 	static boolean getAveregaIntensity () { return  Aintensity; } 
-	static boolean getErode () { return  Erode; } 
+//	static boolean getErode () { return  Erode; } 
 	static String getSignificanceLevel () { return SelectedSL; }
 	static double getGeneratedImages () { return GeneratedI; }
 	static boolean getShowRandomImages () { return Rimages; }
@@ -187,11 +178,9 @@ public class MRF_main implements PlugIn {
 	    	maskThresholdsDialog();
 	   if(SelectedST.equals("User_thresholds"))
 	    	signalThresholdsDialog();
-	  
-	   SelectedDF = "Aritmethic";
+  
 	   Tpercentage = 50.00;
        Aintensity = false;
-       Erode = true;
        SelectedSL = "0.05";
        GeneratedI = 30;
        Rimages = false;
@@ -204,12 +193,9 @@ public class MRF_main implements PlugIn {
 			   Dsignal, Tpercentage, Dratio, 12);
 	   ImagePlus i5=so.disperse();
 	   i5.show(); */
-	   
-	//getToWorkComputer = new RulerMRF();
-//	getToWorkComputer.runMRF();
-	}
-	
-	
+
+	}   
+  // supongo que cuando termine voy a tener que borrar de aca para abajo
 	public static void main(String[] args) {
 		// set the plugins.dir property to make the plugin appear in the Plugins menu
 		Class<?> clazz = MRF_main.class;
