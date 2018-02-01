@@ -1,7 +1,5 @@
 package ar.com.yahoojuliobuonfigli.imagej;
 
-//Clases: vectoriza, mascara, umbraliza, promediaYconvoluciona, resultadosGraficos, resultadosAnaliticos, resultados, gobierna, mainYdialogos, significancia, colocalizacion 
-
 import ij.plugin.PlugIn;
 import ij.*;
 import ij.process.*;
@@ -16,7 +14,8 @@ private ImagePlus channel;
 private boolean[] mask;
 private int h, w, l;
 
-	public Vectorization(boolean[] mask, ImagePlus channel) {
+public Vectorization(boolean[] mask, ImagePlus channel) 
+	{
 	this.channel=channel;
 	IJ.run(channel, "8-bit", ""); 
 	this.mask=mask; 
@@ -24,46 +23,69 @@ private int h, w, l;
 	w=channel.getWidth();
 	l=0;
 	for(int i=0; i<w*h; i++)
-		{if(mask[i]==true) 
-			l++;}
+		{
+		if(mask[i]==true) 
+			l++;
+		}
 	}
 
-	public double[] makeVector() {
-		double[] vector = new double[l];
-		ImageProcessor CHANNEL = channel.getProcessor();
-		int i=0, j=0;
-		for(int y=0; y<h; y++)
+public int[] makeVector() 
+	{
+	int[] vector = new int[l];
+	ImageProcessor CHANNEL = channel.getProcessor();
+	int i=0, j=0;
+	for(int y=0; y<h; y++)
 		{
-			for(int x=0; x<w; x++)
+		for(int x=0; x<w; x++)
 			{
-				if(mask[i]==true)
+			if(mask[i]==true)
 				{
-					vector[j]=CHANNEL.getPixel(x, y); 
-					j++;
+				vector[j]=CHANNEL.getPixel(x, y); 
+				j++;
 				}
-				i++;
+			i++;
 			}
 		}
-		return vector;
-	}
-	
-	static double[][] makeArray(ImageProcessor img, int w, int h) {
-		double[][] matrix = new double[w][h]; 
-		for(int y=0; y<h; y++)
-		{
-			for(int x=0; x<w; x++)
-				matrix[x][y]=img.getPixel(x, y);
-		}
-		return matrix; 
-	}
-	static double[] makeArray(ImageProcessor img, int w, int h, int s) {
-		double[] matrix = new double[s]; 
-		for(int y=0; y<h; y++)
-		{
-			for(int x=0; x<w; x++)
-				matrix[s]=img.getPixel(x,  y);
-		}
-		return matrix; 
+	return vector;
 	}
 
+//estos dos metodos eran estaticos y los hice publicos
+public int[][] makeMatrix(int[] img) 
+	{
+	int w=(int)Math.floor(Math.sqrt(img.length));
+	int h=w;
+	int[][] matrix = new int[w][h]; 
+	int i=0;
+	for(int y=0; y<h; y++)
+		{
+		for(int x=0; x<w; x++)
+			{
+			matrix[x][y]=img[i];
+			i++;
+			}
+		}
+	return matrix; 
+	}		
+	
 }
+	/* probablemente nunca use estos metodos
+	public double[][] makeMatrix(ImageProcessor img, int w, int h) {
+		double[][] matrix = new double[w][h]; 
+		for(int y=0; y<h; y++)
+			{
+			for(int x=0; x<w; x++)
+				matrix[x][y]=img.getPixel(x, y);
+			}
+		return matrix; 
+		}
+	
+	public double[] makeMatrix(ImageProcessor img, int w, int h, int s) {
+		double[] matrix = new double[s]; 
+		for(int y=0; y<h; y++)
+			{
+			for(int x=0; x<w; x++)
+				matrix[s]=img.getPixel(x,  y);
+			}
+		return matrix; 
+		}
+*/
