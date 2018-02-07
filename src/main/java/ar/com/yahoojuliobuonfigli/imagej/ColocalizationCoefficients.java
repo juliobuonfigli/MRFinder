@@ -11,36 +11,35 @@ import ij.plugin.frame.*;
 public class ColocalizationCoefficients {
 
 private int[] red, green, blue;
-private double drRed, drGreen, drBlue, promRed, promGreen, promBlue, dRRed, dRGreen, dRBlue, dmRed, dmGreen, dmBlue;
+private double drRed, drGreen, drBlue, promRed, promGreen, promBlue, dRRed, dRGreen, dRBlue, 
+        dR3Red, dR3Green, dR3Blue, dmRed, dmGreen, dmBlue;
 private int nRed, nGreen, nBlue;
-/*private float iRG, iRB, iGB, iGR, iBR, iBG, iR, iG, iB, iRGB;
-private float mRG, mRB, mGB, mGR, mBR, mBG, mR, mG, mB;
-private float kRG, kRB, kGB, kGR, kBR, kBG, kR, kG, kB;
-private float rRG, rRB, rGB;
-private float sRG, sRB, sGB;
-private float oRG, oRB, oGB, oRGB; */
+private String channel3;
 	
-public ColocalizationCoefficients(int[] red, int[] green, int[] blue) 
+public ColocalizationCoefficients(int[] red, int[] green, int[] blue, String channel3) 
 	{
+	this.channel3=channel3;
 	this.red=red;
-	this.green=green;
 	nRed=number(red);
-	nGreen=number(green);
 	promRed=prom(red);
-	promGreen=prom(green);
 	drRed=dr(red, promRed);
-	drGreen=dr(green, promGreen);
 	dRRed=dR(red);
-	dRGreen=dR(green);
+	dR3Red=dR3(red);
 	dmRed=dm(red);
+	this.green=green;
+	nGreen=number(green);
+	promGreen=prom(green);
+	drGreen=dr(green, promGreen);
+	dRGreen=dR(green);
+	dR3Green=dR3(green);
 	dmGreen=dm(green);
-	if(blue.equals(null)) {} else {
 	this.blue=blue; 
 	nBlue=number(blue);
 	promBlue=prom(blue);
 	drBlue=dr(blue, promBlue);
 	dRBlue=dR(blue);
-	dmBlue=dm(blue); }
+	dR3Blue=dR3(blue);
+	dmBlue=dm(blue); 
 	}
 
 static int number(int[] vector) 
@@ -77,6 +76,14 @@ static double dR(int[] vector)
 		den=den+vector[i]*vector[i];
 	return den;
 	}
+
+static double dR3(int[] vector) 
+{
+double den=0.0;	
+for(int i=0; i<vector.length; i++)
+	den=den+vector[i]*vector[i]*vector[i];
+return den;
+}
 
 static double dm(int[] vector)
 	{
@@ -185,7 +192,7 @@ public double COEFK(int[] c1, int[] c2, int[] c3, double den)
 
 public double COEFM(int[] c1, int[] c2, double den)
 	{ 
-	double coef=0;
+	double coef=0.0;
 	for(int i=0; i<c1.length; i++)
 		{
 		if(c1[i]>0 && c2[i]>0)
@@ -209,7 +216,7 @@ public double[] Pearson()
 	{ 
 	double[] coef = new double[3];	
 	coef[0]=PEARSON(red, green, drRed, drGreen, promRed, promGreen);
-	if(blue.equals(null)) 
+	if(channel3.equals("None")) 
 		{} 
 	else 
 		{
@@ -223,7 +230,7 @@ public double[] Overlap()
 	{ 
 	double[] coef=new double[4];
 	coef[0]=OVERLAP(red, green, dRRed, dRGreen);
-	if(blue.equals(null)) 
+	if(channel3.equals("None")) 
 		{}
 	else
 		{
@@ -239,7 +246,7 @@ public double[] icq()
 	double[] coef=new double[10];
 	coef[0]= ICQ(red, green, nRed);
 	coef[1]= ICQ(red, green, nGreen);
-	if(blue.equals(null))
+	if(channel3.equals("None"))
 		{}
 	else
 		{
@@ -260,7 +267,7 @@ public double[] coefK()
 	double[] coef=new double[9];
 	coef[0]= COEFK(red, green, dRRed);
 	coef[1]= COEFK(red, green, dRGreen);
-	if(blue.equals(null)) 
+	if(channel3.equals("None")) 
 		{}
 	else
 		{
@@ -268,9 +275,9 @@ public double[] coefK()
 		coef[3]= COEFK(red, blue, dRBlue);
 		coef[4]= COEFK(green, blue, dRGreen);
 		coef[5]= COEFK(green, blue, dRBlue);
-		coef[6]= COEFK(red, green, blue, dRRed);
-		coef[7]= COEFK(red, green, blue, dRGreen);
-		coef[8]= COEFK(red, green, blue, dRBlue);
+		coef[6]= COEFK(red, green, blue, dR3Red);
+		coef[7]= COEFK(red, green, blue, dR3Green);
+		coef[8]= COEFK(red, green, blue, dR3Blue);
 		}
 	return coef;
 	}
@@ -279,15 +286,15 @@ public double[] coefM()
 	{ 
 	double[] coef=new double[9];
 	coef[0]= COEFM(red, green, dmRed);
-	coef[1]= COEFM(red, green, dmGreen);
+	coef[1]= COEFM(green, red, dmGreen);
 	if(blue.equals(null)) 
 		{}
 	else
 		{
 		coef[2]= COEFM(red, blue, dmRed);
-		coef[3]= COEFM(red, blue, dmBlue);
+		coef[3]= COEFM(blue, red, dmBlue);
 		coef[4]= COEFM(green, blue, dmGreen);
-		coef[5]= COEFM(green, blue, dmBlue);
+		coef[5]= COEFM(blue, green, dmBlue);
 		coef[6]= COEFM(red, green, blue, dmRed);
 		coef[7]= COEFM(red, green, blue, dmGreen);
 		coef[8]= COEFM(red, green, blue, dmBlue);
@@ -307,7 +314,7 @@ public double[] AllCoef()
 	Overlap=Overlap();
 	icq=icq();
 	coefK=coefK();
-	coefM=coefK();
+	coefM=coefM();
 		int i=0;
 		for(int j=0; j<3; j++)
 			{coef[i]=Pearson[j]; i++;}
@@ -321,7 +328,22 @@ public double[] AllCoef()
 			{coef[i]=coefM[j]; i++;}
 	return coef;
 	}
-// ver por que manders daba mayor que uno, comparar todos los valores
+//getters
+public int[] getRed() 
+	{
+	return red;
+	}
+
+public int[] getGreen() 
+	{
+	return green;
+	}
+
+public int[] getBlue() 
+	{
+	return blue;
+	}
+
 }
 
 

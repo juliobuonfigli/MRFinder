@@ -226,12 +226,19 @@ public void run(String arg0)
 	int[] REDVEC=RedVec.makeVector();
 	Vectorization GreenVec=new Vectorization(MASK, it2);
 	int[] GREENVEC=GreenVec.makeVector();
-	Vectorization BlueVec=new Vectorization(MASK, it3);
-	int[] BLUEVEC=BlueVec.makeVector();
-	ColocalizationCoefficients CC1=new ColocalizationCoefficients(REDVEC, GREENVEC, BLUEVEC);
+	int[] BLUEVEC;
+	if(i3name.equals("None"))
+		BLUEVEC=GREENVEC;
+	else
+		{
+		Vectorization BlueVec=new Vectorization(MASK, it3);
+		BLUEVEC=BlueVec.makeVector();
+		}
+	ColocalizationCoefficients CC1=new ColocalizationCoefficients(REDVEC, GREENVEC, BLUEVEC, i3name);
+	double[] res=CC1.coefM();	
 	//double[] res=CC1.coefM();
-	double[] res=CC1.AllCoef();
-	for(int i=0; i<35; i++)
+	//double[] res=CC1.AllCoef();
+	for(int i=0; i<10; i++)
 		System.out.println("Colo: "+res[i]);
 	  
 	ImagePlus Mask = mask1.renderMask(); Mask.show();
