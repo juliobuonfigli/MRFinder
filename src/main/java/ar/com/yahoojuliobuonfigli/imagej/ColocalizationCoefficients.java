@@ -33,6 +33,7 @@ public ColocalizationCoefficients(int[] red, int[] green, int[] blue, String cha
 	dRGreen=dR(green);
 	dR3Green=dR3(green);
 	dmGreen=dm(green);
+	//if(channel3.equals("None")) {} else {
 	this.blue=blue; 
 	nBlue=number(blue);
 	promBlue=prom(blue);
@@ -92,19 +93,18 @@ static double dm(int[] vector)
 		den=den+vector[i];
 	return den;
 	}
-
 //COEFICIENTES
-public double PEARSON(int[] c1, int[] c2, double denC1, double denC2, double C1pr, double C2pr)
+static double PEARSON(int[] c1, int[] c2, double denC1, double denC2, double C1pr, double C2pr)
 	{ 
 	double coef;
 	double num=0;
-	for(int i=0; i<c1.length; i++)
+	for(int i=0; i<c2.length; i++)
 		num=num+(c1[i]-C1pr)*(c2[i]-C2pr);
 	coef=num/Math.sqrt(denC1*denC2);
 	return coef;
 	}
 
-public double OVERLAP(int[] c1, int[] c2, double denC1, double denC2)
+static double OVERLAP(int[] c1, int[] c2, double denC1, double denC2)
 	{ 
 	double coef;
 	double num=0;
@@ -114,7 +114,7 @@ public double OVERLAP(int[] c1, int[] c2, double denC1, double denC2)
 	return coef;
 	}
 
-public double OVERLAP(int[] c1, int[] c2, int[] c3)
+static double OVERLAP(int[] c1, int[] c2, int[] c3)
 	{ 
 	double coef=0;
 	double denC1=0;
@@ -132,7 +132,7 @@ public double OVERLAP(int[] c1, int[] c2, int[] c3)
 	return coef;
 	}
 
-public double ICQ(int[] c1, int[] c2, int n)
+static double ICQ(int[] c1, int[] c2, int n)
 	{ 
 	int num=0;
 	double coef;
@@ -145,7 +145,7 @@ public double ICQ(int[] c1, int[] c2, int n)
 	return coef;
 	}
 
-public double ICQ(int[] c1, int[] c2, int[] c3, int n)
+static double ICQ(int[] c1, int[] c2, int[] c3, int n)
 	{ 
 	int num=0;
 	double coef;
@@ -158,7 +158,7 @@ public double ICQ(int[] c1, int[] c2, int[] c3, int n)
 	return coef;
 	}
 
-public double ICQ(int[] c1, int[] c2, int[] c3)
+static double ICQ(int[] c1, int[] c2, int[] c3)
 	{ 
 	int num=0;
 	int n=0;
@@ -174,7 +174,7 @@ public double ICQ(int[] c1, int[] c2, int[] c3)
 	return coef;
 	}
 
-public double COEFK(int[] c1, int[] c2, double den)
+static double COEFK(int[] c1, int[] c2, double den)
 	{ 
 	double coef=0;
 	for(int i=0; i<c1.length; i++)
@@ -182,7 +182,7 @@ public double COEFK(int[] c1, int[] c2, double den)
 	return coef/den;
 	}
 
-public double COEFK(int[] c1, int[] c2, int[] c3, double den)
+static double COEFK(int[] c1, int[] c2, int[] c3, double den)
 	{ 
 	double coef=0;
 	for(int i=0; i<c1.length; i++)
@@ -190,7 +190,7 @@ public double COEFK(int[] c1, int[] c2, int[] c3, double den)
 	return coef/den;
 	}
 
-public double COEFM(int[] c1, int[] c2, double den)
+static double COEFM(int[] c1, int[] c2, double den)
 	{ 
 	double coef=0.0;
 	for(int i=0; i<c1.length; i++)
@@ -201,7 +201,7 @@ public double COEFM(int[] c1, int[] c2, double den)
 	return coef/den;
 	}
 
-public double COEFM(int[] c1, int[] c2, int[] c3, double den)
+static double COEFM(int[] c1, int[] c2, int[] c3, double den)
 	{ 
 	double coef=0;
 	for(int i=0; i<c1.length; i++)

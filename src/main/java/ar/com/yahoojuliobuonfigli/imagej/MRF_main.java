@@ -4,6 +4,8 @@ package ar.com.yahoojuliobuonfigli.imagej;
 //Todos los objetos de todas las clases se van a crear en la clase main: esto me va a permitir que todas las 
 //clases puedan ser usadas en otros programas y que practicamente solo tenga que programar la clase main
 //coefficientes: r, R, ICQ, k, M
+//comparar dos grupos de estudio 
+
 
 import ij.plugin.PlugIn;
 import ij.*;
@@ -19,6 +21,7 @@ static String SelectedTitle, SelectedMT, SelectedMO1, SelectedMO2, SelectedST, S
 private String i1name, i2name, i3name, i4name;
 static double Tpercentage, GeneratedI, Dratio, RandomS;
 static boolean Aintensity, Dsignal, Rimages, Smasks, Moptions, Erode;
+private boolean r, R, i, k, m;
 private String[] titles, titles2;	
 private int[] wList;
 static ImagePlus I1, I2, I3, I4, im1, im2, im3, im4, it1, it2, it3;
@@ -30,7 +33,8 @@ private String[] M_thresholds = {"No_thresholds", "User_thresholds", "Default", 
 		"MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen"};
 private String[] S_thresholds = {"No_thresholds", "User_thresholds", "MRF_threshold", "Default", "Huang", "Intermodes", "IsoData", 
    		"IJ_IsoData", "Li", "MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen"};
-   //ojo aca lo acabo de cambiar de publico a privado  
+
+//ojo aca lo acabo de cambiar de publico a privado  
 private double RedMaskValue, GreenMaskValue, BlueMaskValue, RedSignalValue, GreenSignalValue, BlueSignalValue;
 
 public MRF_main() 
@@ -116,6 +120,12 @@ public void moreOptionsDialog()
  	gd4.addNumericField("Random seed: ", 1, 3);
  	gd4.addCheckbox("Show examples of generated images", false);
  	gd4.showDialog();
+ 	gd4.addMessage("Select coefficient to perform statistical significance");
+ 	gd4.addCheckbox("Pearson", false);
+ 	gd4.addCheckbox("Overlap", false);
+ 	gd4.addCheckbox("Intersection", false);
+ 	gd4.addCheckbox("Manders K", false);
+ 	gd4.addCheckbox("Manders M", true);
  	if(gd4.wasCanceled()) 
  		return;
  	SelectedDF = gd4.getNextChoice();
@@ -125,7 +135,12 @@ public void moreOptionsDialog()
     GeneratedI = gd4.getNextNumber();
     Rimages = gd4.getNextBoolean();
     RandomS = gd4.getNextNumber();
-    } 
+    r=gd4.getNextBoolean();
+    R=gd4.getNextBoolean();
+    i=gd4.getNextBoolean();
+    k=gd4.getNextBoolean();
+    m=gd4.getNextBoolean();
+	} 
    
 @Override
 public void run(String arg0)
@@ -175,8 +190,13 @@ public void run(String arg0)
     SelectedSL = "0.05";
     GeneratedI = 30;
     Rimages = false;
-    RandomS = 1;
-	   
+    RandomS = 30;
+	m=true;
+	r=true;
+	R=true;
+	k=true;
+	i=true;
+    
 	if(Moptions==true)
 	    moreOptionsDialog();
 	   
@@ -235,13 +255,29 @@ public void run(String arg0)
 		BLUEVEC=BlueVec.makeVector();
 		}
 	ColocalizationCoefficients CC1=new ColocalizationCoefficients(REDVEC, GREENVEC, BLUEVEC, i3name);
-	double[] res=CC1.coefM();	
+	//double[] res=CC1.coefM();	
 	//double[] res=CC1.coefM();
 	//double[] res=CC1.AllCoef();
-	for(int i=0; i<10; i++)
-		System.out.println("Colo: "+res[i]);
+	//for(int i=0; i<10; i++)
+	//System.out.println("Colo: "+res[i]);
 	  
 	ImagePlus Mask = mask1.renderMask(); Mask.show();
+	int RS=(int)RandomS;
+	int GI=(int)GeneratedI;
+	StatisticalSignificance SS1=new StatisticalSignificance(CC1, r, R, i, k, m, RS, GI, SelectedSL, i3name);
+	//double rrrr = StatisticalSignificance.pValue(2.3);
+	MRFresults r1 = new MRFresults(CC1, SS1, r, R, i, k, m);
+	r1.showRT(); 
+	//ImageStack img2 = SS1.createShiftingStack(REDVEC);
+	//ImageProcessor STACK2 = SS1.createShiftingStack(REDVEC);
+	//ImagePlus img3=IJ.createHyperStack("Putin", 1, 1, 1, 1, 1, 8);
+	//ImagePlus img3 = ImagePlus.createImagePlus(); 
+	//ImagePlus img3=IJ.createImage("Red", "8-bit random", 200, 200, 200); 
+	//img3.setStack("Stack", img2);
+	//img3.show();
+	//System.out.println("Colo: "+p);
+	/*for(int i=0; i<20; i++)
+		System.out.println("Colo: "+p[i]);*/
 	}	
 	  
 public static void main(String[] args) 
