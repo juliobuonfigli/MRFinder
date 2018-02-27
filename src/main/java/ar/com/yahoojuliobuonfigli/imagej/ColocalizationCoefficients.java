@@ -98,7 +98,7 @@ static double PEARSON(int[] c1, int[] c2, double denC1, double denC2, double C1p
 	{ 
 	double coef;
 	double num=0;
-	for(int i=0; i<c2.length; i++)
+	for(int i=0; i<c1.length; i++)
 		num=num+(c1[i]-C1pr)*(c2[i]-C2pr);
 	coef=num/Math.sqrt(denC1*denC2);
 	return coef;

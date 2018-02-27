@@ -190,12 +190,17 @@ public void run(String arg0)
     SelectedSL = "0.05";
     GeneratedI = 30;
     Rimages = false;
-    RandomS = 30;
+    RandomS = 1;
 	m=true;
 	r=true;
 	R=true;
 	k=true;
 	i=true;
+	/*m=false;
+	r=false;
+	R=false;
+	k=false;
+	i=false;*/
     
 	if(Moptions==true)
 	    moreOptionsDialog();
@@ -261,23 +266,24 @@ public void run(String arg0)
 	//for(int i=0; i<10; i++)
 	//System.out.println("Colo: "+res[i]);
 	  
-	ImagePlus Mask = mask1.renderMask(); Mask.show();
+	//ImagePlus Mask = mask1.renderMask(); Mask.show();
 	int RS=(int)RandomS;
 	int GI=(int)GeneratedI;
 	StatisticalSignificance SS1=new StatisticalSignificance(CC1, r, R, i, k, m, RS, GI, SelectedSL, i3name);
 	//double rrrr = StatisticalSignificance.pValue(2.3);
 	MRFresults r1 = new MRFresults(CC1, SS1, r, R, i, k, m);
 	r1.showRT(); 
-	//ImageStack img2 = SS1.createShiftingStack(REDVEC);
-	//ImageProcessor STACK2 = SS1.createShiftingStack(REDVEC);
-	//ImagePlus img3=IJ.createHyperStack("Putin", 1, 1, 1, 1, 1, 8);
-	//ImagePlus img3 = ImagePlus.createImagePlus(); 
-	//ImagePlus img3=IJ.createImage("Red", "8-bit random", 200, 200, 200); 
-	//img3.setStack("Stack", img2);
-	//img3.show();
+	//System.out.println(StatisticalSignificance.toto()); 
+	ImageStack img2 = SS1.createShiftingStack(REDVEC);
+	ImagePlus img3=IJ.createImage("Red", "8-bit random", 200, 200, 200); 
+	img3.setStack("Stack", img2);
+    img3.show();
 	//System.out.println("Colo: "+p);
-	/*for(int i=0; i<20; i++)
-		System.out.println("Colo: "+p[i]);*/
+	/*double[] v;
+	//double[] v=new double[30];
+	v=SS1.test1();
+	for(int i=0; i<30; i++)
+		System.out.println(v[i]);*/
 	}	
 	  
 public static void main(String[] args) 

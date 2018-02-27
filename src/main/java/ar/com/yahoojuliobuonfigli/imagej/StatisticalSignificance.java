@@ -12,16 +12,31 @@ private ImageStack stackRed, stackGreen, stackBlue;
 //private ImageProcessor STACKrED, STACKgREEN, STACKbLUE;
 private boolean r, R, i, k, m;
 private int[] red, green, blue;
-private int seed, gImages, w, h, nRed, nGreen, nBlue;
+private int seed, gImages, w, h, nRed, nGreen, nBlue, halfW;
 private String level, c3;
-private int[][] rRed, rGreen, rBlue; 
+static int[][] rRed, rGreen, rBlue; 
 private double[] coefs;
 private double promRed, promGreen, promBlue, dmRed, dmGreen, dmBlue, drRed, drGreen, drBlue, dRRed, 
 			   dRGreen, dRBlue, dR3Red, dR3Green, dR3Blue;
+//private int[][] vector;
+//private int tamano1, tamano2;
 
 public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean R, boolean i,
 					boolean k, boolean m, int seed, int gImages, String level, String channel3)
 	{
+	red=cc.getRed();
+	double l = Math.sqrt(red.length);
+	double s = l - Math.floor(l);
+	if(s<0.25 || s>0.75)
+		{
+		w=(int)Math.round(l);
+		h=w;
+		}
+	else
+		{
+		w=(int)Math.floor(l);
+		h=w+1;		
+		}
 	c3=channel3;
 	this.seed=seed;
 	this.gImages=gImages;
@@ -34,6 +49,7 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 	this.cc=cc;
 	red=cc.getRed();
 	stackRed = createShiftingStack(red);
+	rRed = new int[w][w*h];
 	rRed = stack2D(stackRed);
 	promRed=ColocalizationCoefficients.prom(red);
 	nRed=ColocalizationCoefficients.number(red);
@@ -48,20 +64,20 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 	dmGreen=ColocalizationCoefficients.dm(green);
 	dRGreen=ColocalizationCoefficients.dR(green);
 	dR3Green=ColocalizationCoefficients.dR3(green);
+	stackGreen = createShiftingStack(green);
+	rGreen = new int[w][w*h];
+	rGreen = stack2D(stackGreen);
+	blue = cc.getBlue();
+	stackBlue = createShiftingStack(blue);
 	if(c3.equals("None")) 
 		{
 		blue=red;
-		stackGreen=stackRed;
 		stackBlue=stackRed;
-		rGreen=rRed;
 		rBlue=rRed;
 		}
 	else
 		{
-		stackGreen = createShiftingStack(green);
-		rGreen = stack2D(stackGreen);
-		blue = cc.getBlue();
-		stackBlue = createShiftingStack(blue);
+		rBlue = new int[w][w*h];
 		rBlue = stack2D(stackBlue);
 		promBlue=ColocalizationCoefficients.prom(blue);
 		nBlue=ColocalizationCoefficients.number(blue);
@@ -71,18 +87,7 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 		dR3Blue=ColocalizationCoefficients.dR3(blue);
 		}
 	coefs=cc.AllCoef();
-	double l = Math.sqrt(red.length);
-	double s = l - Math.floor(l);
-	if(s<0.25 || s>0.75)
-		{
-		w=(int)Math.round(l);
-		h=w;
-		}
-	else
-		{
-		w=(int)Math.floor(l);
-		h=w+1;		
-		}
+	halfW=(int)Math.floor((double)w/2);
 	}
 
 public double returnP(double[] vec, double coef)
@@ -113,8 +118,8 @@ static double[] pd(double[] v)
 static double pValue(double z)
 	{
 	double a, a1, s;   //poner una sentencia para limitar el numero de iteraciones
-	final double e=0.00000000000001;
-	int n=0;
+	final double e=0.00000000000000001;
+	int n=0, cont=0;
 	s=z;
 	a=z;
 	do
@@ -123,10 +128,16 @@ static double pValue(double z)
 		n=n+2;
 		a1=a/(n+1);
 		s=s+a1;
+		cont++;
+		if(cont>999999999)
+			break;
 		}
 	while(Math.abs(a1)>e);
-	s=s/(Math.sqrt(2*(Math.PI)));
-	return s;
+	s=0.5-Math.abs(s/(Math.sqrt(2*(Math.PI))));
+	if(z<0)
+		return -s;
+	else
+		return s;
 	}
 
 public ImageStack createShiftingStack(int[] vec)
@@ -170,6 +181,7 @@ public int[][] stack2D(ImageStack ST)
 			for(int x=0; x<w; x++)
 				{
 				vec[z][i]=(int)ST.getVoxel(x, y, z);
+				//vec[z][i]=(int)(Math.random()*250);
 				i++;
 				}
 			}
@@ -193,13 +205,13 @@ public double[] PEARSON()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[3];
-	v = pearsonVec(green, rRed, gImages, dRRed, dRGreen, promRed, promGreen);
+	v = pearsonVec(rGreen[0], rRed, gImages, dRRed, dRGreen, promRed, promGreen);
 	pv[0]=returnP(v, coefs[0]);
-	if(c3.equals("None"))
+	if(!c3.equals("None"))
 		{
-		v = pearsonVec(blue, rRed, gImages, drRed, drGreen, promRed, promGreen);
+		v = pearsonVec(rBlue[0], rRed, gImages, drRed, drGreen, promRed, promGreen);
 		pv[1]=returnP(v, coefs[1]);
-		v = pearsonVec(blue, rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
+		v = pearsonVec(rBlue[0], rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
 		pv[2]=returnP(v, coefs[2]);
 		}
 	return pv;
@@ -246,21 +258,21 @@ public double[] OVERLAP()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[7];
-	v = overlapVec(green, rRed, gImages, dRRed, dRGreen);
+	v = overlapVec( rGreen[halfW], rRed, gImages, dRRed, dRGreen);
 	pv[0]=returnP(v, coefs[3]);
-	if(c3.equals("None"))
+	if(!c3.equals("None"))
 		{
-		v = overlapVec(blue, rRed, gImages, dRRed, dRGreen);
+		v = overlapVec(rBlue[halfW], rRed, gImages, dRRed, dRGreen);
 		pv[1]=returnP(v, coefs[4]);
-		v = overlapVec(blue, rGreen, gImages, dRBlue, dRGreen);
+		v = overlapVec(rBlue[halfW], rGreen, gImages, dRBlue, dRGreen);
 		pv[2]=returnP(v, coefs[5]);
-		v = overlapVec(blue, green, rRed, gImages);
+		v = overlapVec(rBlue[halfW], rGreen[halfW], rRed, gImages);
 		pv[3]=returnP(v, coefs[6]);
-		v = overlapVec(blue, red, rGreen, gImages);
+		v = overlapVec(rBlue[halfW], rRed[halfW], rGreen, gImages);
 		pv[4]=returnP(v, coefs[6]);
-		v = overlapVec(blue, green, rBlue, gImages);
+		v = overlapVec(rBlue[halfW], rGreen[halfW], rBlue, gImages);
 		pv[5]=returnP(v, coefs[6]);
-		v = overlapVec(red, rGreen, rBlue, gImages);
+		v = overlapVec(rRed[halfW], rGreen, rBlue, gImages);
 		pv[6]=returnP(v, coefs[6]);
 		}
 	return pv;
@@ -307,27 +319,27 @@ public double[] ICQ()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[10];
-	v = icqVec(green, rRed, gImages, nRed);
+	v = icqVec(rGreen[halfW], rRed, gImages, nRed);
 	pv[0]=returnP(v, coefs[7]);
-	v = icqVec(green, rRed, gImages, nGreen);
+	v = icqVec(rGreen[halfW], rRed, gImages, nGreen);
 	pv[1]=returnP(v, coefs[8]);
-	if(c3.equals("None"))
+	if(!c3.equals("None"))
 		{
-		v = icqVec(blue, rRed, gImages, nRed);
+		v = icqVec(rBlue[halfW], rRed, gImages, nRed);
 		pv[2]=returnP(v, coefs[9]);
-		v = icqVec(blue, rRed, gImages, nBlue);
+		v = icqVec(rBlue[halfW], rRed, gImages, nBlue);
 		pv[3]=returnP(v, coefs[10]);
-		v = icqVec(blue, rGreen, gImages, nGreen);
+		v = icqVec(rBlue[halfW], rGreen, gImages, nGreen);
 		pv[4]=returnP(v, coefs[11]);
-		v = icqVec(blue, rGreen, gImages, nBlue);
+		v = icqVec(rBlue[halfW], rGreen, gImages, nBlue);
 		pv[5]=returnP(v, coefs[12]);
-		v = icqVec(green, blue, rRed, gImages, nRed);
+		v = icqVec(rGreen[halfW], rBlue[halfW], rRed, gImages, nRed);
 		pv[6]=returnP(v, coefs[13]);
-		v = icqVec(red, blue, rGreen, gImages, nGreen);
+		v = icqVec(rRed[halfW], rBlue[halfW], rGreen, gImages, nGreen);
 		pv[7]=returnP(v, coefs[14]);
-		v = icqVec(red, green, rBlue, gImages, nBlue);
+		v = icqVec(rRed[halfW], rGreen[halfW], rBlue, gImages, nBlue);
 		pv[8]=returnP(v, coefs[15]);
-		v = icqVec(blue, rGreen, rBlue, gImages);
+		v = icqVec(rBlue[halfW], rGreen, rBlue, gImages);
 		pv[9]=returnP(v, coefs[16]);
 		}
 	return pv;
@@ -361,54 +373,26 @@ public double[] COEFK()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[9];
-	v = kVec(green, rRed, gImages, nRed);
+	v = kVec(rGreen[halfW], rRed, gImages, dRRed);
 	pv[0]=returnP(v, coefs[17]);
-	v = kVec(green, rRed, gImages, nGreen);
+	v = kVec(rGreen[halfW], rRed, gImages, dRGreen);
 	pv[1]=returnP(v, coefs[18]);
-	if(c3.equals("None"))
+	if(!c3.equals("None"))
 		{
-		v = kVec(blue, rRed, gImages, dRRed);
+		v = kVec(rBlue[halfW], rRed, gImages, dRRed);
 		pv[2]=returnP(v, coefs[19]);
-		v = kVec(blue, rRed, gImages, dRBlue);
+		v = kVec(rBlue[halfW], rRed, gImages, dRBlue);
 		pv[3]=returnP(v, coefs[20]);
-		v = kVec(blue, rGreen, gImages, dRGreen);
+		v = kVec(rBlue[halfW], rGreen, gImages, dRGreen);
 		pv[4]=returnP(v, coefs[21]);
-		v = kVec(blue, rGreen, gImages, dRBlue);
+		v = kVec(rBlue[halfW], rGreen, gImages, dRBlue);
 		pv[5]=returnP(v, coefs[22]);
-		v = kVec(green, blue, rRed, gImages, dR3Red);
+		v = kVec(rGreen[halfW], rBlue[halfW], rRed, gImages, dR3Red);
 		pv[6]=returnP(v, coefs[23]);
-		v = kVec(red, blue, rGreen, gImages, dR3Green);
+		v = kVec(rRed[halfW], rBlue[halfW], rGreen, gImages, dR3Green);
 		pv[7]=returnP(v, coefs[24]);
-		v = kVec(red, green, rBlue, gImages, dR3Blue);
+		v = kVec(rRed[halfW], rGreen[halfW], rBlue, gImages, dR3Blue);
 		pv[8]=returnP(v, coefs[25]);
-		}
-	return pv;
-	}
-
-public double[] COEFM()
-	{
-	double[] v = new double[gImages];
-	double[] pv = new double[9];
-	v = mVec(green, rRed, gImages, nRed);
-	pv[0]=returnP(v, coefs[26]);
-	v = mVec(green, rRed, gImages, nGreen);
-	pv[1]=returnP(v, coefs[27]);
-	if(c3.equals("None"))
-		{
-		v = mVec(blue, rRed, gImages, dmRed);
-		pv[2]=returnP(v, coefs[28]);
-		v = mVec(blue, rRed, gImages, dmBlue);
-		pv[3]=returnP(v, coefs[29]);
-		v = mVec(blue, rGreen, gImages, dmGreen);
-		pv[4]=returnP(v, coefs[30]);
-		v = mVec(blue, rGreen, gImages, dmBlue);
-		pv[5]=returnP(v, coefs[31]);
-		v = mVec(green, blue, rRed, gImages, dmRed);
-		pv[6]=returnP(v, coefs[32]);
-		v = mVec(red, blue, rGreen, gImages, dmGreen);
-		pv[7]=returnP(v, coefs[33]);
-		v = mVec(red, green, rBlue, gImages, dmBlue);
-		pv[8]=returnP(v, coefs[34]);
 		}
 	return pv;
 	}
@@ -436,6 +420,34 @@ for(int i=0; i<n; i++)
 	}
 return vec;
 }
+
+public double[] COEFM()
+	{
+	double[] v = new double[gImages];
+	double[] pv = new double[9];
+	v = mVec(rGreen[halfW], rRed, gImages, dmRed);
+	pv[0]=returnP(v, coefs[26]);
+	v = mVec(rGreen[halfW], rRed, gImages, dmGreen);
+	pv[1]=returnP(v, coefs[27]);
+	if(!c3.equals("None"))
+		{
+		v = mVec(rBlue[halfW], rRed, gImages, dmRed);
+		pv[2]=returnP(v, coefs[28]);
+		v = mVec(rBlue[halfW], rRed, gImages, dmBlue);
+		pv[3]=returnP(v, coefs[29]);
+		v = mVec(rBlue[halfW], rGreen, gImages, dmGreen);
+		pv[4]=returnP(v, coefs[30]);
+		v = mVec(rBlue[halfW], rGreen, gImages, dmBlue);
+		pv[5]=returnP(v, coefs[31]);
+		v = mVec(rGreen[halfW], rBlue[halfW], rRed, gImages, dmRed);
+		pv[6]=returnP(v, coefs[32]);
+		v = mVec(rRed[halfW], rBlue[halfW], rGreen, gImages, dmGreen);
+		pv[7]=returnP(v, coefs[33]);
+		v = mVec(rRed[halfW], rGreen[halfW], rBlue, gImages, dmBlue);
+		pv[8]=returnP(v, coefs[34]);
+		}
+	return pv;
+	}
 
 public double[] Allpvalues() 
 	{
@@ -468,7 +480,9 @@ public ImageStack returnStackRed() { return stackRed; }
 public ImageStack returnStackGreen() { return stackGreen; }	
 public ImageStack returnStackBlue() { return stackBlue; }
 
+public double[] test1() { return  mVec(rGreen[0], rRed, gImages, dmRed); }
 }
+
 //public ImagePlus createShiftingStack(int[] vec, int w, int h)
 //este va a ser el metodo sobrecargado para cuando no haya mascara y la seleccion quede rectagular
 
