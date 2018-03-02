@@ -26,31 +26,30 @@ public Mask(ImagePlus primaryMask, ImagePlus red, ImagePlus green, ImagePlus blu
 	            String MaskOperator1, String MaskOperator2, double redValue, double greenValue, 
 	            double blueValue, String Channel3, String SelectedM)
 	{
-	this.Channel3=Channel3;
-	this.SelectedM=SelectedM;
-	this.MaskThreshold=MaskThreshold;
-	this.red=red;
-	this.green=green;
-	this.blue=blue;
+	this.Channel3 = Channel3;
+	this.SelectedM = SelectedM;
+	this.MaskThreshold = MaskThreshold;
+	this.red = red;
+	this.green = green;
+	this.blue = blue;
 	IJ.run(red, "8-bit", ""); 
 	IJ.run(green, "8-bit", "");
 	IJ.run(blue, "8-bit", "");
-	this.redValue=redValue;
-	this.greenValue=greenValue;
-	this.blueValue=blueValue;
-	h=red.getHeight(); 
-	w=red.getWidth(); 
+	this.redValue = redValue;
+	this.greenValue = greenValue;
+	this.blueValue = blueValue;
+	h = red.getHeight(); 
+	w = red.getWidth(); 
 	Red = new boolean[h*w];
 	Green = new boolean[h*w];
 	Blue = new boolean[h*w]; 
 	this.primaryMask=primaryMask;
 	Mask = new boolean[h*w]; 
-	this.MaskOperator1=MaskOperator1;
-	this.MaskOperator2=MaskOperator2;
+	this.MaskOperator1 = MaskOperator1;
+	this.MaskOperator2 = MaskOperator2;
 	ThresholdsMask = new boolean[h*w]; 
 	finalMask = new boolean[w*h];
 	}
-
 
 public boolean[] binarizeChannel(ImagePlus Channel, double value) 
     {
@@ -62,12 +61,12 @@ public boolean[] binarizeChannel(ImagePlus Channel, double value)
 		if(MaskThreshold.equals("User_thresholds")) 
 			{
 			IJ.setThreshold(Channel, value, 255);
-			IJ.run(Channel, "Convert to Mask", ""); 
+			//IJ.run(Channel, "Convert to Mask", ""); 
 			}
 		else 
 			{		
 			IJ.setAutoThreshold(Channel, MaskThreshold);
-			IJ.run(Channel, "Convert to Mask", ""); 
+		    //IJ.run(Channel, "Convert to Mask", ""); 
 			}
 		}
 	ImageProcessor CHANNEL=Channel.getProcessor(); 

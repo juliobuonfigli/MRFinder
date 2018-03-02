@@ -167,6 +167,7 @@ public void umbralize()
 		}
 	}
 
+
 }
 
 /* version de creacion de PSF pero cargada en un vector de dos dimensiones
