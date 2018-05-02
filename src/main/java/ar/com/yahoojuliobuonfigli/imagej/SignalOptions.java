@@ -147,7 +147,8 @@ public void umbralize()
 	else 
 		{
 		if(threshold.equals("MRF_threshold"))
-			{  //IMAGE.performMRFthreshold(); tengo que escribir este metodo
+			{  
+			//IMAGE.performMRFthreshold(); tengo que escribir este metodo
 			}
 		else
 			{

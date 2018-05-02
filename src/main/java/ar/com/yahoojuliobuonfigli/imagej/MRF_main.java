@@ -26,7 +26,7 @@ private String[] titles, titles2;
 private int[] wList;
 static ImagePlus I1, I2, I3, I4, im1, im2, im3, im4, it1, it2, it3, mask;
 private ImagePlus imp;
-private String[] level = {"0,05", "0,01"};
+private String[] level = {"0.05", "0.01"};
 private String[] M_operator = {"AND", "OR"};
 //private String[] D_function = {"Linear", "Quadratic", "Geometric", "Aritmethic"};
 private String[] M_thresholds = {"No_thresholds", "User_thresholds", "Default", "Huang", "Intermodes", "IsoData", "IJ_IsoData", "Li", 
@@ -165,7 +165,7 @@ public void run(String arg0)
 	IJ.openImage("E:\\Escritorio\\red.tif").show();           //I1.show();
 	IJ.openImage("E:\\Escritorio\\green.tif").show();         //I2.show();
 	IJ.openImage("E:\\Escritorio\\blue.tif").show();          //I3.show();
-	IJ.openImage("E:\\Escritorio\\Mask.tif").show();          //I4.show();
+	IJ.openImage("E:\\Escritorio\\mask.tif").show();          //I4.show();
 	
 	wList = WindowManager.getIDList();
 	if(wList==null || wList.length<1) 
@@ -265,7 +265,6 @@ public void run(String arg0)
 		BLUEVEC=BlueVec.makeVector();
 		}
 	
-	
 	ColocalizationCoefficients CC1=new ColocalizationCoefficients(REDVEC, GREENVEC, BLUEVEC, i3name); 
 	
 	int RS=(int)RandomS;
@@ -317,10 +316,18 @@ public void run(String arg0)
 		img3.setStack("Stack", img2);
 		img3.show();
 		}
-	/*double[] tes=new double[2];
-	tes=SS1.test2();
-	System.out.println("M: "+tes[0]);
-	System.out.println("SD: "+tes[1]);*/
+	//double[] tes=new double[38];
+	/*tes=SS1.test3();
+	for(int i=0; i<38; i++) 
+		System.out.println(tes[i]);*/
+	
+	/*tes=r1.test2();
+	for(int i=0; i<38; i++) 
+		System.out.println(tes[i]);*/
+	
+	/*tes=CC1.AllCoef();
+	for(int i=0; i<34; i++) 
+		System.out.println(tes[i]);*/	
 	}
 	  
 public static void main(String[] args) 

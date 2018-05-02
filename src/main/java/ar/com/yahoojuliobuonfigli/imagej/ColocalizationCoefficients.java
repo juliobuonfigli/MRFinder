@@ -134,34 +134,36 @@ static double OVERLAP(int[] c1, int[] c2, int[] c3)
 
 static double ICQ(int[] c1, int[] c2, int n)
 	{ 
-	int num=0;
+	double N=(double)n;
+	double num=0;
 	double coef;
 	for(int i=0; i<c1.length; i++)
 		{
 		if(c1[i]>0 && c2[i]>0)
 			num++;
 		}
-	coef=100*num/n;
+	coef=100*num/N;
 	return coef;
 	}
 
 static double ICQ(int[] c1, int[] c2, int[] c3, int n)
 	{ 
-	int num=0;
+	double N=(double)n;
+	double num=0;
 	double coef;
 	for(int i=0; i<c1.length; i++)
 		{
 		if(c1[i]>0 && c2[i]>0 && c3[i]>0)
 			num++;
 		}
-	coef=100*num/n;
+	coef=100*num/N;
 	return coef;
 	}
 
 static double ICQ(int[] c1, int[] c2, int[] c3)
 	{ 
-	int num=0;
-	int n=0;
+	double num=0;
+	double n=0;
 	double coef;
 	for(int i=0; i<c1.length; i++)
 		{

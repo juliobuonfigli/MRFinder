@@ -119,8 +119,12 @@ static double[] pd(double[] v)
 
 static double pValue(double z)
 	{
+	if(z<-5)
+		z=-5;
+	if(z>5)
+		z=5;
 	double a, a1, s;   //poner una sentencia para limitar el numero de iteraciones
-	final double e=0.00000000000000001;
+	final double e=0.00000001;
 	int n=0, cont=0;
 	s=z;
 	a=z;
@@ -137,15 +141,15 @@ static double pValue(double z)
 	while(Math.abs(a1)>e);
 	s=0.5-Math.abs(s/(Math.sqrt(2*(Math.PI))));
 	if(z<0)
-		return -s;
+		return -1*s;
 	else
 		return s;
 	}
 
-public ImageStack createShiftingStack(int[] vec)
+public ImageStack createShiftingStack(int[] vec) 
 	{
-	int cont, X, pp, val;
-	int k = w/2;
+	int k=w/2; 
+	int cont, var, pp, val;
 	ImageStack st = ImageStack.create(w, h, w, 8); 
 	for(int z=0; z<w; z++)
 		{
@@ -155,13 +159,16 @@ public ImageStack createShiftingStack(int[] vec)
 			for(int x=0; x<w; x++)
 				{
 				if(x<k)
-					X=x+(w-k);
+					var=x+(w-k);
 					else
-					X=Math.abs(x-k);
+					var=Math.abs(x-k);
 				pp=(int)Math.floor(cont/w)*w+cont%w;
 		        if(pp>=vec.length) val=0; else val=vec[pp];  //agregado recientemente
-				st.setVoxel(X, y, z, val); 
-		        cont++;
+		        if(z%2==0)
+					st.setVoxel(y, var, z, val); 
+				else
+					st.setVoxel(var, y, z, val); 
+				cont++;
 				}
 			}
 		if(k>w)
@@ -207,11 +214,11 @@ public double[] PEARSON()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[3];
-	v = pearsonVec(rGreen[0], rRed, gImages, dRRed, dRGreen, promRed, promGreen);
+	v = pearsonVec(rGreen[0], rRed, gImages, dRGreen, dRRed, promGreen, promRed);
 	pv[0]=returnP(v, coefs[0]);
 	if(!c3.equals("None"))
 		{
-		v = pearsonVec(rBlue[0], rRed, gImages, drRed, drGreen, promRed, promGreen);
+		v = pearsonVec(rBlue[0], rRed, gImages, drBlue, drRed, promBlue, promRed);
 		pv[1]=returnP(v, coefs[1]);
 		v = pearsonVec(rBlue[0], rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
 		pv[2]=returnP(v, coefs[2]);
@@ -260,11 +267,11 @@ public double[] OVERLAP()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[7];
-	v = overlapVec( rGreen[halfW], rRed, gImages, dRRed, dRGreen);
+	v = overlapVec(rGreen[halfW], rRed, gImages, dRGreen, dRRed);
 	pv[0]=returnP(v, coefs[3]);
 	if(!c3.equals("None"))
 		{
-		v = overlapVec(rBlue[halfW], rRed, gImages, dRRed, dRGreen);
+		v = overlapVec(rRed[halfW], rBlue, gImages, dRRed, dRBlue);
 		pv[1]=returnP(v, coefs[4]);
 		v = overlapVec(rBlue[halfW], rGreen, gImages, dRBlue, dRGreen);
 		pv[2]=returnP(v, coefs[5]);
@@ -272,7 +279,7 @@ public double[] OVERLAP()
 		pv[3]=returnP(v, coefs[6]);
 		v = overlapVec(rBlue[halfW], rRed[halfW], rGreen, gImages);
 		pv[4]=returnP(v, coefs[6]);
-		v = overlapVec(rBlue[halfW], rGreen[halfW], rBlue, gImages);
+		v = overlapVec(rRed[halfW], rGreen[halfW], rBlue, gImages);
 		pv[5]=returnP(v, coefs[6]);
 		v = overlapVec(rRed[halfW], rGreen, rBlue, gImages);
 		pv[6]=returnP(v, coefs[6]);
@@ -341,7 +348,7 @@ public double[] ICQ()
 		pv[7]=returnP(v, coefs[14]);
 		v = icqVec(rRed[halfW], rGreen[halfW], rBlue, gImages, nBlue);
 		pv[8]=returnP(v, coefs[15]);
-		v = icqVec(rBlue[halfW], rGreen, rBlue, gImages);
+		v = icqVec(rRed[halfW], rGreen, rBlue, gImages);
 		pv[9]=returnP(v, coefs[16]);
 		}
 	return pv;
@@ -484,7 +491,7 @@ public ImageStack returnStackBlue() { return stackBlue; }
 
 public double[] test1() { return  mVec(rGreen[0], rRed, gImages, dmRed); }
 public double[] test2() { return  TEST1; }
-
+public double[] test3() { return  Allpvalues(); }
 
 }
 

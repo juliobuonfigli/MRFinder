@@ -53,29 +53,19 @@ public Mask(ImagePlus primaryMask, ImagePlus red, ImagePlus green, ImagePlus blu
 
 public boolean[] binarizeChannel(ImagePlus Channel, double value) 
     {
+	ImageProcessor CHANNEL=Channel.getProcessor();
 	boolean[] VECTOR = new boolean[w*h];
-	if(MaskThreshold.equals("No_thresholds")) 
-		{}
-	else
+	if(!MaskThreshold.equals("No_thresholds") && !MaskThreshold.equals("User_thresholds")) 
 		{
-		if(MaskThreshold.equals("User_thresholds")) 
-			{
-			IJ.setThreshold(Channel, value, 255);
-			//IJ.run(Channel, "Convert to Mask", ""); 
-			}
-		else 
-			{		
-			IJ.setAutoThreshold(Channel, MaskThreshold);
-		    //IJ.run(Channel, "Convert to Mask", ""); 
-			}
+		AutoThresholder thresholder = new AutoThresholder();
+		value = thresholder.getThreshold(MaskThreshold, CHANNEL.getHistogram());
 		}
-	ImageProcessor CHANNEL=Channel.getProcessor(); 
 	int i=0;
 	for(int y=0; y<h; y++)
 		{
 		for(int x=0; x<w; x++)
 			{
-			if(CHANNEL.getPixel(x, y)==0)
+			if(CHANNEL.getPixel(x, y)<value)
 				VECTOR[i]=false; 
 			else
 				VECTOR[i]=true;
@@ -168,7 +158,44 @@ public ImagePlus renderMask()
 
 }
 
-/*public Mask(ImagePlus primaryMask, ImagePlus red, ImagePlus green, ImagePlus blue, String MaskThreshold, 
+
+/*public boolean[] binarizeChannel(ImagePlus Channel, double value) 
+{
+boolean[] VECTOR = new boolean[w*h];
+if(MaskThreshold.equals("No_thresholds")) 
+	{}
+else
+	{
+	if(MaskThreshold.equals("User_thresholds")) 
+		{
+		//AutoThresholder thresholder = new AutoThresholder();
+		//value = thresholder.getThreshold(threshold, IMAGE.getHistogram());
+		IJ.setThreshold(Channel, value, 255);
+		//IJ.run(Channel, "Convert to Mask", ""); 
+		}
+	else 
+		{		
+		IJ.setAutoThreshold(Channel, MaskThreshold);
+	    //IJ.run(Channel, "Convert to Mask", ""); 
+		}
+	}
+ImageProcessor CHANNEL=Channel.getProcessor(); 
+int i=0;
+for(int y=0; y<h; y++)
+	{
+	for(int x=0; x<w; x++)
+		{
+		if(CHANNEL.getPixel(x, y)==0)
+			VECTOR[i]=false; 
+		else
+			VECTOR[i]=true;
+		i++;
+		}
+	}
+return VECTOR;
+}
+
+public Mask(ImagePlus primaryMask, ImagePlus red, ImagePlus green, ImagePlus blue, String MaskThreshold, 
         String MaskOperator1, String MaskOperator2, double redValue, double greenValue, 
         double blueValue, String SelectedM, String Channel3)
 {
