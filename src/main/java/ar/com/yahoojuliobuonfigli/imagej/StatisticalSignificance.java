@@ -163,7 +163,7 @@ public ImageStack createShiftingStack(int[] vec)
 					else
 					var=Math.abs(x-k);
 				pp=(int)Math.floor(cont/w)*w+cont%w;
-		        if(pp>=vec.length) val=0; else val=vec[pp];  //agregado recientemente
+		        if(pp>=vec.length) val=0; else val=vec[pp];  
 		        if(z%2==0)
 					st.setVoxel(y, var, z, val); 
 				else
