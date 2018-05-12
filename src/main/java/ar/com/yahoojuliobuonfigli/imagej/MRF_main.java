@@ -20,7 +20,7 @@ public class MRF_main implements PlugIn {
 static String SelectedTitle, SelectedMT, SelectedMO1, SelectedMO2, SelectedST, SelectedSL, SelectedDF;
 private String i1name, i2name, i3name, i4name;
 static double Tpercentage, GeneratedI, Dratio, RandomS;
-static boolean Aintensity, Dsignal, Rimages, Smasks, Moptions, bComposite;
+static boolean Aintensity, Dsignal, Rimages, Smasks, Moptions, bComposite, scram;
 private boolean r, R, i, k, m;
 private String[] titles, titles2;	
 private int[] wList;
@@ -126,17 +126,19 @@ public void moreOptionsDialog()
     //gd4.addNumericField("MRF effective signal percentage: ", 50, 2);
  	//gd4.addCheckbox("Equalize intensities", false); //iguala los otros dos a la intensidad del menos intenso
  	gd4.addChoice("Significance level: ", level, level[0]);
-	gd4.addNumericField("Number of random coefficients: ", 100, 2);
- 	gd4.addCheckbox("Show generated stack", false);
+	gd4.addNumericField("Number of random coefficients: ", 30, 2);
+ 	gd4.addCheckbox("Show generated stack", true);
  	gd4.addCheckbox("Binary composite", true);
  	//gd4.addCheckbox("Show square colocalization map", false);
  	gd4.addNumericField("Random seed: ", 1, 3);
  	gd4.addMessage("Select coefficient to perform statistical significance");
  	gd4.addCheckbox("Pearson", false);
- 	gd4.addCheckbox("Overlap", false);
+ 	gd4.addCheckbox("Overlap", true);
  	gd4.addCheckbox("Intersection", false);
  	gd4.addCheckbox("Manders K", false);
- 	gd4.addCheckbox("Manders M", true);
+ 	gd4.addCheckbox("Manders M", false);
+ 	gd4.addMessage("Do instead of Van Stensel based significance");
+ 	gd4.addCheckbox("Pixel Scrambling", false);
  	gd4.showDialog();
  	if(gd4.wasCanceled()) 
  		return;
@@ -153,6 +155,7 @@ public void moreOptionsDialog()
     i=gd4.getNextBoolean();
     k=gd4.getNextBoolean();
     m=gd4.getNextBoolean();
+    scram=gd4.getNextBoolean();
 	} 
    
 @Override
@@ -165,7 +168,7 @@ public void run(String arg0)
 	IJ.openImage("E:\\Escritorio\\red.tif").show();           //I1.show();
 	IJ.openImage("E:\\Escritorio\\green.tif").show();         //I2.show();
 	IJ.openImage("E:\\Escritorio\\blue.tif").show();          //I3.show();
-	IJ.openImage("E:\\Escritorio\\mask.tif").show();          //I4.show();
+	//IJ.openImage("E:\\Escritorio\\mask.tif").show();          //I4.show();
 	
 	wList = WindowManager.getIDList();
 	if(wList==null || wList.length<1) 
@@ -200,16 +203,17 @@ public void run(String arg0)
     //SelectedDF = "Aritmethic";
 	//Tpercentage = 50.00;
     //Aintensity = false;
-    SelectedSL = "0.05";
-    GeneratedI = 100;
-    Rimages = false;
-    RandomS = 1;
+    SelectedSL="0.05";
+    GeneratedI=30;
+    Rimages=true;
+    RandomS=1;
 	bComposite=true;
-    m=true;
+    m=false;
 	r=false;
-	R=false;
+	R=true;
 	k=false;
 	i=false;
+	scram=false;
 	
 	if(Moptions==true)
 	    moreOptionsDialog();
@@ -269,7 +273,7 @@ public void run(String arg0)
 	
 	int RS=(int)RandomS;
 	int GI=(int)GeneratedI;
-	StatisticalSignificance SS1=new StatisticalSignificance(CC1, r, R, i, k, m, RS, GI, SelectedSL, i3name);
+	StatisticalSignificance SS1=new StatisticalSignificance(CC1, r, R, i, k, m, RS, GI, SelectedSL, i3name, scram);
 	
 	MRFresults r1 = new MRFresults(CC1, SS1, r, R, i, k, m, SelectedSL, i3name);
 	r1.showRT(); 
@@ -311,7 +315,8 @@ public void run(String arg0)
 	
 	if(Rimages)
 		{
-		ImageStack img2 = SS1.createShiftingStack(REDVEC);
+		//ImageStack img2 = SS1.createShiftingStack(REDVEC);
+		ImageStack img2 = SS1.returnStackRed();
 		ImagePlus img3=IJ.createImage("Red", "8-bit random", 200, 200, 200); 
 		img3.setStack("Stack", img2);
 		img3.show();
@@ -328,8 +333,9 @@ public void run(String arg0)
 	/*tes=CC1.AllCoef();
 	for(int i=0; i<34; i++) 
 		System.out.println(tes[i]);*/	
+	//System.out.println(SS1.test4());
 	}
-	  
+  
 public static void main(String[] args) 
 	{
 	// set the plugins.dir property to make the plugin appear in the Plugins menu

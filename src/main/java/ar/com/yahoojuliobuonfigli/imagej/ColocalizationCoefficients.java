@@ -298,8 +298,8 @@ public double[] coefM()
 		coef[4]= COEFM(green, blue, dmGreen);
 		coef[5]= COEFM(blue, green, dmBlue);
 		coef[6]= COEFM(red, green, blue, dmRed);
-		coef[7]= COEFM(red, green, blue, dmGreen);
-		coef[8]= COEFM(red, green, blue, dmBlue);
+		coef[7]= COEFM(green, red, blue, dmGreen);
+		coef[8]= COEFM(blue, green, red, dmBlue);
 		}
 	return coef;
 	}

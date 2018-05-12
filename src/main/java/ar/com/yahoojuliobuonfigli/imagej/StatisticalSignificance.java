@@ -11,7 +11,7 @@ public class StatisticalSignificance {
 
 private ColocalizationCoefficients cc;
 private ImageStack stackRed, stackGreen, stackBlue;
-private boolean r, R, i, k, m;
+private boolean r, R, i, k, m, scram;
 private int[] red, green, blue;
 private int seed, gImages, w, h, nRed, nGreen, nBlue, halfW;
 private String level, c3;
@@ -23,7 +23,7 @@ private Random rand;
 double[] TEST1=new double[2];
 
 public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean R, boolean i,
-					boolean k, boolean m, int seed, int gImages, String level, String channel3)
+					boolean k, boolean m, int seed, int gImages, String level, String channel3, boolean scram)
 	{
 	red=cc.getRed();
 	double l = Math.sqrt(red.length);
@@ -48,10 +48,14 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 	this.k=k;
 	this.m=m;
 	this.cc=cc;
+	this.scram=scram;
 	rand = new Random(seed);
-	stackRed = createShiftingStack(red);
-	rRed = new int[w][w*h];
-	rRed = stack2D(stackRed);
+	if(scram==true)
+		stackRed = createShiftingStack2(red);
+	else
+		stackRed = createShiftingStack(red);
+	rRed = new int[gImages][w*h];
+	rRed = stack2D(stackRed, red);
 	promRed=ColocalizationCoefficients.prom(red);
 	nRed=ColocalizationCoefficients.number(red);
 	drRed=ColocalizationCoefficients.dr(red, promRed);
@@ -65,12 +69,15 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 	dmGreen=ColocalizationCoefficients.dm(green);
 	dRGreen=ColocalizationCoefficients.dR(green);
 	dR3Green=ColocalizationCoefficients.dR3(green);
-	stackGreen = createShiftingStack(green);
-	rGreen = new int[w][w*h];
-	rGreen = stack2D(stackGreen);
-	blue = cc.getBlue();
-	stackBlue = createShiftingStack(blue);
-	if(c3.equals("None")) 
+	if(scram==true)
+		stackGreen = createShiftingStack2(green);
+	else
+		stackGreen = createShiftingStack(green);
+	rGreen = new int[gImages][w*h];
+	rGreen = stack2D(stackGreen, green);
+	//blue = cc.getBlue();
+	//stackBlue = createShiftingStack(blue); no enteiendo para que lo puse
+ 	if(c3.equals("None")) 
 		{
 		blue=red;
 		stackBlue=stackRed;
@@ -78,8 +85,13 @@ public StatisticalSignificance(ColocalizationCoefficients cc, boolean r, boolean
 		}
 	else
 		{
-		rBlue = new int[w][w*h];
-		rBlue = stack2D(stackBlue);
+		blue = cc.getBlue();
+		if(scram==true)
+			stackBlue = createShiftingStack(blue);
+		else
+			stackBlue = createShiftingStack(blue);
+		rBlue = new int[gImages][w*h];
+		rBlue = stack2D(stackBlue, blue);
 		promBlue=ColocalizationCoefficients.prom(blue);
 		nBlue=ColocalizationCoefficients.number(blue);
 		drBlue=ColocalizationCoefficients.dr(blue, promBlue);
@@ -148,41 +160,99 @@ static double pValue(double z)
 
 public ImageStack createShiftingStack(int[] vec) 
 	{
-	int k=w/2; 
-	int cont, var, pp, val;
-	ImageStack st = ImageStack.create(w, h, w, 8); 
-	for(int z=0; z<w; z++)
+	int cont, ind, val, X, Y, r1, r2;
+	ImageStack st = ImageStack.create(w, h, gImages, 8); 
+	for(int z=0; z<gImages; z++)
 		{
 		cont=0;
+		r1=rand.nextInt(gImages);
+		r2=rand.nextInt(gImages);
 		for(int y=0; y<h; y++)
 			{
 			for(int x=0; x<w; x++)
 				{
-				if(x<k)
-					var=x+(w-k);
-					else
-					var=Math.abs(x-k);
-				pp=(int)Math.floor(cont/w)*w+cont%w;
-		        if(pp>=vec.length) val=0; else val=vec[pp];  
-		        if(z%2==0)
-					st.setVoxel(y, var, z, val); 
+				if(x+r1<w)
+					X=x+r1;
 				else
-					st.setVoxel(var, y, z, val); 
-				cont++;
+					X=x+r1-w;
+				if(y+r2<h)
+					Y=y+r2;
+				else
+					Y=y+r2-h;
+				ind=(int)Math.floor(cont/w)*w+cont%w;
+		        if(ind>=vec.length) 
+		        	val=vec[rand.nextInt(vec.length)];  
+		        else 
+		        	val=vec[ind];  
+		        st.setVoxel(X, Y, z, val);
 				}
 			}
-		if(k>w)
-			k=0;
-		k++;
 		}
 	return st;
 	}
 
-public int[][] stack2D(ImageStack ST)
+public int[] randomVec(int[] v)
 	{
-	int[][] vec = new int[w][w*h];
-	int i;
-	for(int z=0; z<w; z++)
+	int n=v.length;
+	boolean[] u=new boolean[n];                                                               
+	for(int i=0; i<n; i++)
+		u[i]=true;
+	int[] rv=new int[n];
+	int hh, e;
+	hh=0;	
+	while(hh<n)
+		{
+		e=rand.nextInt(n);
+		if(u[e]==true)
+			{
+			rv[hh]=v[e];
+			u[e]=false;
+			hh++;
+			}
+		}
+	return rv;
+	}	
+
+public ImageStack createShiftingStack2(int[] vec) 
+	{
+	int cont;
+	int[] rv=new int[vec.length];
+	ImageStack st = ImageStack.create(w, h, gImages, 8); 
+	for(int z=0; z<gImages; z++)
+		{
+		cont=0;
+		rv=randomVec(vec);
+		for(int y=0; y<h; y++)
+			{
+			for(int x=0; x<w; x++)
+				{
+				if(cont<vec.length)
+					st.setVoxel(x, y, z, rv[cont]);
+				else
+					st.setVoxel(x, y, z, rv[rand.nextInt(rv.length)]);
+				cont++;
+				}
+			}
+		}
+	return st;
+	}
+
+public int[][] stack2D(ImageStack ST, int[] canal)
+	{
+	int[][] vec = new int[gImages][w*h];
+	int i=0;
+	for(int y=0; y<h; y++)
+		{
+		for(int x=0; x<w; x++)
+			{
+			if(i<canal.length)
+				vec[0][i]=canal[i];
+			else
+				vec[0][i]=canal[rand.nextInt(canal.length)];
+			i++;
+			}
+		}
+	for(int z=1; z<gImages; z++)
 		{	
 		i=0;
 		for(int y=0; y<h; y++)
@@ -190,7 +260,6 @@ public int[][] stack2D(ImageStack ST)
 			for(int x=0; x<w; x++)
 				{
 				vec[z][i]=(int)ST.getVoxel(x, y, z);
-				//vec[z][i]=(int)(Math.random()*250);
 				i++;
 				}
 			}
@@ -201,65 +270,48 @@ public int[][] stack2D(ImageStack ST)
 public double[] pearsonVec(int[] C1, int[][] rc, int n, double dC1, double dC2, double pC1, double pC2)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.PEARSON(C1, rc[pos], dC1, dC2, pC1, pC2);
-		}
+		vec[i] = ColocalizationCoefficients.PEARSON(C1, rc[i], dC1, dC2, pC1, pC2);
 	return vec;
 	}
 
 public double[] PEARSON()
 	{
-	double[] v = new double[gImages];
-	double[] pv = new double[3];
-	v = pearsonVec(rGreen[0], rRed, gImages, dRGreen, dRRed, promGreen, promRed);
-	pv[0]=returnP(v, coefs[0]);
+	double[] v=new double[gImages];
+	double[] pv=new double[3];
+	v = pearsonVec(rGreen[halfW], rRed, gImages, drGreen, drRed, promGreen, promRed);
+	pv[0]=returnP(v, coefs[halfW]);
 	if(!c3.equals("None"))
 		{
-		v = pearsonVec(rBlue[0], rRed, gImages, drBlue, drRed, promBlue, promRed);
+		v = pearsonVec(rBlue[halfW], rRed, gImages, drBlue, drRed, promBlue, promRed);
 		pv[1]=returnP(v, coefs[1]);
-		v = pearsonVec(rBlue[0], rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
+		v = pearsonVec(rBlue[halfW], rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
 		pv[2]=returnP(v, coefs[2]);
 		}
 	return pv;
 	}
 
-public double[] overlapVec(int[] C1, int[][] rc, int n, double dC1, double dC2)
+public double[] overlapVec(int[][] rc1, int[][] rc2, int n, double dC1, double dC2)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.OVERLAP(C1, rc[pos], dC1, dC2);
-		}
+		vec[i] = ColocalizationCoefficients.OVERLAP(rc1[i], rc2[i], dC1, dC2);
 	return vec;
 	}
 
 public double[] overlapVec(int[] C1, int[] C2, int[][] rc, int n)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.OVERLAP(C1, C2, rc[pos]);
-		}
+		vec[i] = ColocalizationCoefficients.OVERLAP(C1, C2, rc[i]);
 	return vec;
 	}
 
-public double[] overlapVec(int[] C1, int[][] rc1, int[][] rc2, int n)
+public double[] overlapVec(int[][] rc1, int[][] rc2, int[][] rc3, int n)
 	{
 	double[] vec = new double[n];
-	int p1, p2;
 	for(int i=0; i<n; i++)
-		{
-		p1=rand.nextInt(w); 		
-		p2=rand.nextInt(w); 	
-		vec[i] = ColocalizationCoefficients.OVERLAP(C1, rc1[p1], rc2[p2]);
-		}
+		vec[i] = ColocalizationCoefficients.OVERLAP(rc1[i], rc2[i], rc3[i]);
 	return vec;
 	}
 
@@ -267,21 +319,21 @@ public double[] OVERLAP()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[7];
-	v = overlapVec(rGreen[halfW], rRed, gImages, dRGreen, dRRed);
+	v=overlapVec(rGreen, rRed, gImages, dRGreen, dRRed);
 	pv[0]=returnP(v, coefs[3]);
 	if(!c3.equals("None"))
 		{
-		v = overlapVec(rRed[halfW], rBlue, gImages, dRRed, dRBlue);
+		v = overlapVec(rRed, rBlue, gImages, dRRed, dRBlue);
 		pv[1]=returnP(v, coefs[4]);
-		v = overlapVec(rBlue[halfW], rGreen, gImages, dRBlue, dRGreen);
+		v = overlapVec(rBlue, rGreen, gImages, dRBlue, dRGreen);
 		pv[2]=returnP(v, coefs[5]);
-		v = overlapVec(rBlue[halfW], rGreen[halfW], rRed, gImages);
+		v = overlapVec(rBlue[0], rGreen[0], rRed, gImages);
 		pv[3]=returnP(v, coefs[6]);
-		v = overlapVec(rBlue[halfW], rRed[halfW], rGreen, gImages);
+		v = overlapVec(rBlue[0], rRed[0], rGreen, gImages);
 		pv[4]=returnP(v, coefs[6]);
-		v = overlapVec(rRed[halfW], rGreen[halfW], rBlue, gImages);
+		v = overlapVec(rRed[0], rGreen[0], rBlue, gImages);
 		pv[5]=returnP(v, coefs[6]);
-		v = overlapVec(rRed[halfW], rGreen, rBlue, gImages);
+		v = overlapVec(rRed, rGreen, rBlue, gImages);
 		pv[6]=returnP(v, coefs[6]);
 		}
 	return pv;
@@ -492,8 +544,49 @@ public ImageStack returnStackBlue() { return stackBlue; }
 public double[] test1() { return  mVec(rGreen[0], rRed, gImages, dmRed); }
 public double[] test2() { return  TEST1; }
 public double[] test3() { return  Allpvalues(); }
+public String test4() 
+	{
+	if(rRed[0][0]==(int)stackRed.getVoxel(0, 0, 0) && rGreen[0][0]==(int)stackGreen.getVoxel(0, 0, 0) && rBlue[0][0]==(int)stackBlue.getVoxel(0, 0, 0))
+		return "ToBien";
+	else
+		return "ToMal";
+	}
 
 }
 
 
-
+/*
+public ImageStack createShiftingStack(int[] vec) 
+	{
+	int cont, var, pp, val, k;
+	ImageStack st = ImageStack.create(w, h, w+h+2, 8); 
+	k=0; 
+	for(int z=0; z<w+h+2; z++)
+		{
+		cont=0;
+		for(int y=0; y<h; y++)
+			{
+			for(int x=0; x<w; x++)
+				{
+				if(x<k)
+					var=x+(w-k);
+				else
+					var=Math.abs(x-k);
+				pp=(int)Math.floor(cont/w)*w+cont%w;
+		        if(pp>=vec.length) 
+		        	val=rand.nextInt(256);  
+		        else 
+		        	val=vec[pp];  
+		        if(z%2==0)
+		        	st.setVoxel(var, y, z, val);
+				else
+					st.setVoxel(y, var, z, val); 
+				cont++;
+				}
+			}
+		if(k>w)
+			k=0;
+		k++;
+		}
+	return st;
+	}*/
