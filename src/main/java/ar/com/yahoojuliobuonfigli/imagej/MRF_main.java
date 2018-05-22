@@ -333,7 +333,7 @@ public void run(String arg0)
 	/*tes=CC1.AllCoef();
 	for(int i=0; i<34; i++) 
 		System.out.println(tes[i]);*/	
-	//System.out.println(SS1.test4());
+	//System.out.println(SS1.test());
 	}
   
 public static void main(String[] args) 

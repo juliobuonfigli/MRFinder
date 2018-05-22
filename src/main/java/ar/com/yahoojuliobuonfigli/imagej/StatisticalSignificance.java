@@ -131,13 +131,11 @@ static double[] pd(double[] v)
 
 static double pValue(double z)
 	{
-	if(z<-5)
-		z=-5;
-	if(z>5)
-		z=5;
+	if(z<-3) z=-3;
+	if(z>3)  z=3;
 	double a, a1, s;   //poner una sentencia para limitar el numero de iteraciones
-	final double e=0.00000001;
-	int n=0, cont=0;
+	final double e=0.00001;
+	int n=0; //cont=0;
 	s=z;
 	a=z;
 	do
@@ -146,9 +144,9 @@ static double pValue(double z)
 		n=n+2;
 		a1=a/(n+1);
 		s=s+a1;
-		cont++;
-		if(cont>999999999)
-			break;
+		//cont++;
+		//if(cont>999999999)
+			//break;
 		}
 	while(Math.abs(a1)>e);
 	s=0.5-Math.abs(s/(Math.sqrt(2*(Math.PI))));
@@ -161,12 +159,16 @@ static double pValue(double z)
 public ImageStack createShiftingStack(int[] vec) 
 	{
 	int cont, ind, val, X, Y, r1, r2;
+	float  r3, r4, r5;
 	ImageStack st = ImageStack.create(w, h, gImages, 8); 
 	for(int z=0; z<gImages; z++)
 		{
 		cont=0;
-		r1=rand.nextInt(gImages);
-		r2=rand.nextInt(gImages);
+		r1=rand.nextInt(w);
+		r2=rand.nextInt(h);
+		r3=rand.nextFloat();
+		r4=rand.nextFloat();
+		r5=rand.nextFloat();
 		for(int y=0; y<h; y++)
 			{
 			for(int x=0; x<w; x++)
@@ -184,7 +186,13 @@ public ImageStack createShiftingStack(int[] vec)
 		        	val=vec[rand.nextInt(vec.length)];  
 		        else 
 		        	val=vec[ind];  
-		        st.setVoxel(X, Y, z, val);
+		        if(r3<0.50) X=Math.abs(X-(w-1));
+		        if(r4<0.50) Y=Math.abs(Y-(h-1));
+		        if(r5<0.50)
+		        	st.setVoxel(X, Y, z, val);
+		        else
+		        	st.setVoxel(Y, X, z, val);
+		        cont++;
 				}
 			}
 		}
@@ -267,11 +275,11 @@ public int[][] stack2D(ImageStack ST, int[] canal)
 	return vec;
 	}
 
-public double[] pearsonVec(int[] C1, int[][] rc, int n, double dC1, double dC2, double pC1, double pC2)
+public double[] pearsonVec(int[][] rc1, int[][] rc2, int n, double dC1, double dC2, double pC1, double pC2)
 	{
 	double[] vec = new double[n];
 	for(int i=0; i<n; i++)
-		vec[i] = ColocalizationCoefficients.PEARSON(C1, rc[i], dC1, dC2, pC1, pC2);
+		vec[i] = ColocalizationCoefficients.PEARSON(rc1[i], rc2[i], dC1, dC2, pC1, pC2);
 	return vec;
 	}
 
@@ -279,13 +287,13 @@ public double[] PEARSON()
 	{
 	double[] v=new double[gImages];
 	double[] pv=new double[3];
-	v = pearsonVec(rGreen[halfW], rRed, gImages, drGreen, drRed, promGreen, promRed);
-	pv[0]=returnP(v, coefs[halfW]);
+	v = pearsonVec(rGreen, rRed, gImages, drGreen, drRed, promGreen, promRed);
+	pv[0]=returnP(v, coefs[0]);
 	if(!c3.equals("None"))
 		{
-		v = pearsonVec(rBlue[halfW], rRed, gImages, drBlue, drRed, promBlue, promRed);
+		v = pearsonVec(rBlue, rRed, gImages, drBlue, drRed, promBlue, promRed);
 		pv[1]=returnP(v, coefs[1]);
-		v = pearsonVec(rBlue[halfW], rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
+		v = pearsonVec(rBlue, rGreen, gImages, drBlue, drGreen, promBlue, promGreen);
 		pv[2]=returnP(v, coefs[2]);
 		}
 	return pv;
@@ -339,40 +347,27 @@ public double[] OVERLAP()
 	return pv;
 	}
 
-public double[] icqVec(int[] C1, int[][] rc, int n, int N)
+public double[] icqVec(int[][] rc1, int[][] rc2, int n, int N)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.ICQ(C1, rc[pos], N);
-		}
+		vec[i] = ColocalizationCoefficients.ICQ(rc1[i], rc2[i], N);
 	return vec;
 	}
 
 public double[] icqVec(int[] C1, int[] C2, int[][] rc, int n, int N)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.ICQ(C1, C2, rc[pos], N);
-		}
+		vec[i] = ColocalizationCoefficients.ICQ(C1, C2, rc[i], N);
 	return vec;
 	}
 
-public double[] icqVec(int[] C1, int[][] rc1, int[][] rc2, int n)
+public double[] icqVec(int[][] rc1, int[][] rc2, int[][] rc3, int n)
 	{
 	double[] vec = new double[n];
-	int p1, p2;
 	for(int i=0; i<n; i++)
-		{
-		p1=rand.nextInt(w); 	
-		p2=rand.nextInt(w); 
-		vec[i] = ColocalizationCoefficients.ICQ(C1, rc2[p1], rc2[p2]);
-		}
+		vec[i] = ColocalizationCoefficients.ICQ(rc1[i], rc2[i], rc3[i]);
 	return vec;
 	}
 
@@ -380,53 +375,45 @@ public double[] ICQ()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[10];
-	v = icqVec(rGreen[halfW], rRed, gImages, nRed);
+	v = icqVec(rGreen, rRed, gImages, nRed);
 	pv[0]=returnP(v, coefs[7]);
-	v = icqVec(rGreen[halfW], rRed, gImages, nGreen);
+	v = icqVec(rGreen, rRed, gImages, nGreen);
 	pv[1]=returnP(v, coefs[8]);
 	if(!c3.equals("None"))
 		{
-		v = icqVec(rBlue[halfW], rRed, gImages, nRed);
+		v = icqVec(rBlue, rRed, gImages, nRed);
 		pv[2]=returnP(v, coefs[9]);
-		v = icqVec(rBlue[halfW], rRed, gImages, nBlue);
+		v = icqVec(rBlue, rRed, gImages, nBlue);
 		pv[3]=returnP(v, coefs[10]);
-		v = icqVec(rBlue[halfW], rGreen, gImages, nGreen);
+		v = icqVec(rBlue, rGreen, gImages, nGreen);
 		pv[4]=returnP(v, coefs[11]);
-		v = icqVec(rBlue[halfW], rGreen, gImages, nBlue);
+		v = icqVec(rBlue, rGreen, gImages, nBlue);
 		pv[5]=returnP(v, coefs[12]);
-		v = icqVec(rGreen[halfW], rBlue[halfW], rRed, gImages, nRed);
+		v = icqVec(rGreen[0], rBlue[0], rRed, gImages, nRed);
 		pv[6]=returnP(v, coefs[13]);
-		v = icqVec(rRed[halfW], rBlue[halfW], rGreen, gImages, nGreen);
+		v = icqVec(rRed[0], rBlue[0], rGreen, gImages, nGreen);
 		pv[7]=returnP(v, coefs[14]);
-		v = icqVec(rRed[halfW], rGreen[halfW], rBlue, gImages, nBlue);
+		v = icqVec(rRed[0], rGreen[0], rBlue, gImages, nBlue);
 		pv[8]=returnP(v, coefs[15]);
-		v = icqVec(rRed[halfW], rGreen, rBlue, gImages);
+		v = icqVec(rRed, rGreen, rBlue, gImages);
 		pv[9]=returnP(v, coefs[16]);
 		}
 	return pv;
 	}
 
-public double[] kVec(int[] C1, int[][] rc, int n, double den)
+public double[] kVec(int[][] rc1, int[][] rc2, int n, double den)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.COEFK(C1, rc[pos], den);
-		}
+		vec[i] = ColocalizationCoefficients.COEFK(rc1[i], rc2[i], den);
 	return vec;
 	}
 
 public double[] kVec(int[] C1, int[] C2, int[][] rc, int n, double den)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.COEFK(C1, C2, rc[pos], den);
-		}
+		vec[i] = ColocalizationCoefficients.COEFK(C1, C2, rc[i], den);
 	return vec;
 	}
 
@@ -434,77 +421,69 @@ public double[] COEFK()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[9];
-	v = kVec(rGreen[halfW], rRed, gImages, dRRed);
+	v = kVec(rGreen, rRed, gImages, dRRed);
 	pv[0]=returnP(v, coefs[17]);
-	v = kVec(rGreen[halfW], rRed, gImages, dRGreen);
+	v = kVec(rGreen, rRed, gImages, dRGreen);
 	pv[1]=returnP(v, coefs[18]);
 	if(!c3.equals("None"))
 		{
-		v = kVec(rBlue[halfW], rRed, gImages, dRRed);
+		v = kVec(rBlue, rRed, gImages, dRRed);
 		pv[2]=returnP(v, coefs[19]);
-		v = kVec(rBlue[halfW], rRed, gImages, dRBlue);
+		v = kVec(rBlue, rRed, gImages, dRBlue);
 		pv[3]=returnP(v, coefs[20]);
-		v = kVec(rBlue[halfW], rGreen, gImages, dRGreen);
+		v = kVec(rBlue, rGreen, gImages, dRGreen);
 		pv[4]=returnP(v, coefs[21]);
-		v = kVec(rBlue[halfW], rGreen, gImages, dRBlue);
+		v = kVec(rBlue, rGreen, gImages, dRBlue);
 		pv[5]=returnP(v, coefs[22]);
-		v = kVec(rGreen[halfW], rBlue[halfW], rRed, gImages, dR3Red);
+		v = kVec(rGreen[0], rBlue[0], rRed, gImages, dR3Red);
 		pv[6]=returnP(v, coefs[23]);
-		v = kVec(rRed[halfW], rBlue[halfW], rGreen, gImages, dR3Green);
+		v = kVec(rRed[0], rBlue[0], rGreen, gImages, dR3Green);
 		pv[7]=returnP(v, coefs[24]);
-		v = kVec(rRed[halfW], rGreen[halfW], rBlue, gImages, dR3Blue);
+		v = kVec(rRed[0], rGreen[0], rBlue, gImages, dR3Blue);
 		pv[8]=returnP(v, coefs[25]);
 		}
 	return pv;
 	}
 
-public double[] mVec(int[] C1, int[][] rc, int n, double den)
+public double[] mVec(int[][] rc1, int[][] rc2, int n, double den)
 	{
 	double[] vec = new double[n];
-	int pos;
 	for(int i=0; i<n; i++)
-		{
-		pos=rand.nextInt(w); 				
-		vec[i] = ColocalizationCoefficients.COEFM(C1, rc[pos], den);
-		}
+		vec[i] = ColocalizationCoefficients.COEFM(rc1[i], rc2[i], den);
 	return vec;
 	}
 
 public double[] mVec(int[] C1, int[] C2, int[][] rc, int n, double den)
-{
-double[] vec = new double[n];
-int pos;
-for(int i=0; i<n; i++)
 	{
-	pos=rand.nextInt(w); 				
-	vec[i] = ColocalizationCoefficients.COEFM(C1, C2, rc[pos], den);
+	double[] vec = new double[n];
+	for(int i=0; i<n; i++)
+		vec[i] = ColocalizationCoefficients.COEFM(C1, C2, rc[i], den);
+	return vec;
 	}
-return vec;
-}
 
 public double[] COEFM()
 	{
 	double[] v = new double[gImages];
 	double[] pv = new double[9];
-	v = mVec(rGreen[halfW], rRed, gImages, dmRed);
+	v = mVec(rGreen, rRed, gImages, dmRed);
 	pv[0]=returnP(v, coefs[26]);
-	v = mVec(rGreen[halfW], rRed, gImages, dmGreen);
+	v = mVec(rGreen, rRed, gImages, dmGreen);
 	pv[1]=returnP(v, coefs[27]);
 	if(!c3.equals("None"))
 		{
-		v = mVec(rBlue[halfW], rRed, gImages, dmRed);
+		v = mVec(rBlue, rRed, gImages, dmRed);
 		pv[2]=returnP(v, coefs[28]);
-		v = mVec(rBlue[halfW], rRed, gImages, dmBlue);
+		v = mVec(rBlue, rRed, gImages, dmBlue);
 		pv[3]=returnP(v, coefs[29]);
-		v = mVec(rBlue[halfW], rGreen, gImages, dmGreen);
+		v = mVec(rBlue, rGreen, gImages, dmGreen);
 		pv[4]=returnP(v, coefs[30]);
-		v = mVec(rBlue[halfW], rGreen, gImages, dmBlue);
+		v = mVec(rBlue, rGreen, gImages, dmBlue);
 		pv[5]=returnP(v, coefs[31]);
-		v = mVec(rGreen[halfW], rBlue[halfW], rRed, gImages, dmRed);
+		v = mVec(rGreen[0], rBlue[0], rRed, gImages, dmRed);
 		pv[6]=returnP(v, coefs[32]);
-		v = mVec(rRed[halfW], rBlue[halfW], rGreen, gImages, dmGreen);
+		v = mVec(rRed[0], rBlue[0], rGreen, gImages, dmGreen);
 		pv[7]=returnP(v, coefs[33]);
-		v = mVec(rRed[halfW], rGreen[halfW], rBlue, gImages, dmBlue);
+		v = mVec(rRed[0], rGreen[0], rBlue, gImages, dmBlue);
 		pv[8]=returnP(v, coefs[34]);
 		}
 	return pv;
@@ -541,16 +520,11 @@ public ImageStack returnStackRed() { return stackRed; }
 public ImageStack returnStackGreen() { return stackGreen; }	
 public ImageStack returnStackBlue() { return stackBlue; }
 
-public double[] test1() { return  mVec(rGreen[0], rRed, gImages, dmRed); }
+public double[] test1() { return  mVec(rGreen, rRed, gImages, dmRed); }
 public double[] test2() { return  TEST1; }
 public double[] test3() { return  Allpvalues(); }
-public String test4() 
-	{
-	if(rRed[0][0]==(int)stackRed.getVoxel(0, 0, 0) && rGreen[0][0]==(int)stackGreen.getVoxel(0, 0, 0) && rBlue[0][0]==(int)stackBlue.getVoxel(0, 0, 0))
-		return "ToBien";
-	else
-		return "ToMal";
-	}
+public double test() { return ColocalizationCoefficients.OVERLAP(rRed[0], rGreen[0], dRGreen, dRRed);}
+
 
 }
 
